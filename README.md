@@ -1,6 +1,7 @@
 # r-study-group
 Materials for R study group
 
-# Data Viz
+# Book: Beyond Multiple Linear Regression (Roback, 2021)
 
-# Data Wrangling
+## Answers for Exercises: 
+

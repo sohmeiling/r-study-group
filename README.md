@@ -5,3 +5,4 @@ Materials for R study group
 
 ## Answers for Exercises: 
 
+Chapter 1: Review Multiple Linear Regression

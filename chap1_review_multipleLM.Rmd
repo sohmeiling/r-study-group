@@ -201,6 +201,10 @@ output: html_document
     m. Often salary data is logged before analysis.  Would you recommend logging starting salary in this study?  Support your decision analytically.
     n. Regardless of your answer to the previous question, provide an interpretation for the coefficient for the male coefficient in a modified Model 3 after logging starting salary.
     o. Build your own final model for this study and justify the selection of your final model.  You might consider interactions with gender, since those terms could show that discrimination is stronger among certain workers.  Based on your final model, do you find evidence of gender discrimination at Harris Trust?  
+
+```{r test-main1, child = 'sections_file/bankSalary.Rmd'}
+```    
+
 <br>
 
 2. **Sitting and MTL thickness.** @Siddarth2018 researched relations between time spent sitting (sedentary behavior) and the thickness of a participant's medial temporal lobe (MTL) in a 2018 paper entitled, "Sedentary behavior associated with reduced medial temporal lobe thickness in middle-aged and older adults".  MTL volume is negatively associated with Alzheimer's disease and memory impairment. Their data on 35 adults can be found in `sitting.csv`. Key variables include: <ul>
@@ -243,7 +247,7 @@ output: html_document
     g. A *New York Times* article was published discussing @Siddarth2018 with the title "Standing Up at Your Desk Could Make You Smarter" [@Friedman2018]. Do you agree with this headline choice? Why or why not? 
     - No, because the result only showed that sitting longer is associated with reduced medial temporal lobe thickness, but it does not imply anything about standing activities. 
 
-```{r test-main2, child = 'sitting.Rmd'}
+```{r test-main2, child = 'sections_file/sitting.Rmd'}
 ```
 <br>
 
@@ -275,7 +279,7 @@ Washington [@harlfoxem]. The dataset includes the following variables:
     m. Are LLSR assumptions satisfied in Model 4? Why or why not?
     n. Find another explanatory variable which can be added to Model 4 to create a model with a higher adjusted $R^2$ value. Interpret the coefficient of this added variable.
 
-```{r test-main, child = 'guided_q3.Rmd'}
+```{r test-main, child = 'sections_file/guided_q3.Rmd'}
 ```
    
 ### Open-Ended Exercises

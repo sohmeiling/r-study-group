@@ -1,0 +1,44 @@
+---
+title: "Sitting"
+author: "Kai Hao"
+date: "11/3/2021"
+output: html_document
+---
+(a)
+```{r}
+datSitting <- read.csv("sitting.csv")
+model1 <- lm(sitting ~ MET, data = datSitting)
+summary(model1)
+```
+
+(b) 
+```{r}
+hist(datSitting$MET)
+
+datSitting$logMET=log(datSitting$MET)
+hist(datSitting$logMET)
+```
+
+(c)
+```{r}
+install.packages("patchwork")
+library(performance)
+model2 <- lm(MTL ~ sitting, data = datSitting)
+check_model(model2)
+```
+
+(d)
+```{r}
+datSitting <- datSitting %>% mutate(centered_age = age - mean(age))
+model3 <- lm(MTL ~ sitting+centered_age, data = datSitting)
+summary(model3)
+```
+
+(e)
+```{r}
+model4 <- lm(MTL ~ sitting+age+logMET, data = datSitting)
+summary(model4)
+confint(model4)
+```
+
+

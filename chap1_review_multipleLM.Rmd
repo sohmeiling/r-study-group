@@ -186,148 +186,24 @@ output: html_document
     - `educ` = years of education
     - `exper` = months of prior work experience </ul>
     Creating an indicator variable based on `sex` could be helpful.  
-    ```{r}
-library(knitr) 
-library(gridExtra)
-library(kableExtra)
-library(jtools)
-library(GGally)
-library(rsample)
-library(broom)
-library(tidyverse)  
-banksalary <- read_csv("banksalary.csv")
-```
     a. Identify observational units, the response variable, and explanatory variables.
-- Observational units: 93 observation units.
-- Response variable: beginning salary (annual salary at time of hire)
-- Explanatory variables: sex, sal77, senior, age, educ, exper
-    
     b. The mean starting salary of male workers (\$5957) was 16\% higher than the mean starting salary of female workers (\$5139).  Confirm these mean salaries.  Is this enough evidence to conclude gender discrimination exists?  If not, what further evidence would you need?
-```{r}
-meanbsal <- banksalary %>% group_by(sex) %>% summarise(mean=mean(bsal))
-```
-- Not enough evidence. Evidence from statistical analysis needed.
-
     c. How would you expect age, experience, and education to be related to starting salary?  Generate appropriate exploratory plots; are the relationships as you expected?  What implications does this have for modeling?
-```{r}
-ggpairs(data = banksalary,
-columns = c("age", "educ", "exper", "bsal"))
-```
-- Age, experience and education are expected to correlate with starting salary. However, only education is correlated with starting salary, according to the plot. 
-- Implication: Education should be taken into account when examining gender effect on starting salary. 
-    
-    
     d. Why might it be important to control for seniority (number of years with the bank) if we are only concerned with the salary when the worker started?
-    - The year of employment might affect the starting salary, and everyone has different starting point. 
-    
     e. By referring to exploratory plots and summary statistics, are any explanatory variables (including sex) closely related to each other?  What implications does this have for modeling?
-```{r}
-ggpairs(data = banksalary,
-columns = c("sex","age", "educ", "exper", "bsal", "senior"))
-```
-    - Age and experience are closely related. We might consider including only one of the variables in the model.
-    
     f. Fit a simple linear regression model with starting salary as the response and experience as the sole explanatory variable (Model 1).  Interpret the intercept and slope of this model; also interpret the R-squared value.  Is there a significant relationship between experience and starting salary?
-```{r}
-model_bank <- lm(bsal ~ exper, data = banksalary)
-summary(model_bank)
-```
-    -The model estimates that when experience is 0, the starting salary would be 5289.
-    -The model estimates that when starting salary increases by 1.30 with every unit increase in experience.
-    -Experience explained 1.71% of the variance in starting salary.
-    -No significant relationship between experience and starting salary.
-    
     g. Does Model 1 meet all linear least squares regression assumptions?  List each assumption and how you decided if it was met or not.
-```{r}
-library(performance)
-check_model(model_bank)
-```
-- L: Linearity violated.
-- I: Not violated. 
-- N: Not violated.
-- E: Violated.
-
     h. Is a model with all 4 confounding variables (Model 2, with `senior`, `educ`, `exper`, and `age`) better than a model with just experience (Model 1)?  Justify with an appropriate significance test in addition to summary statistics of model performance.
-```{r}
-model_bank2 <- lm(bsal ~ senior + educ + exper + age, data = banksalary)
-summary(model_bank2)
-
-anova(model_bank, model_bank2)
-```
-    - Yes, model 2 is better than model 1.
-    
     i. You should have noticed that the term for age was not significant in Model 2.  What does this imply about age and about future modeling steps?
-    - We can exclude age from future models.
-    
     j. Generate an appropriate coded scatterplot to examine a potential age-by-experience interaction.  How would you describe the nature of this interaction?
-```{r}
-ggplot(banksalary, aes(x = exper, y = bsal)) +
-geom_point(aes(color = age)) +
-scale_color_gradientn(colors = c("#00AFBB", "#E7B800", "#FC4E07"))
-
-ggplot(banksalary, aes(x = exper, y = age)) + geom_point() 
-```
-- When age increases, experience increases.
-    
     k. A potential final model (Model 3) would contain terms for seniority, education, and experience in addition to sex.  Does this model meet all regression assumptions?  State a 95\% confidence interval for sex and interpret this interval carefully in the context of the problem.
-```{r}
-model_bank3 <- lm(bsal ~ senior + educ + exper + sex, data = banksalary)
-summary(model_bank3)
-
-check_model(model_bank3)
-```
-    - Yes, this model appears to fulfill all the assumptions.
-```{r}
-confint(model_bank3)
-```
-    - We can be 95% confident that the starting salary of male is between 488.15 and 956.45 higher than female, after accounting for seniority, experience and education.
-    
     l. Based on Model 3, what conclusions can be drawn about gender discrimination at Harris Trust?  Do these conclusions have to be qualified at all, or are they pretty clear cut?
-    - There is a gender discrimination in starting salary at Harris Trust, after accounting for seniority, experience and education.
-    
     m. Often salary data is logged before analysis.  Would you recommend logging starting salary in this study?  Support your decision analytically.
-```{r}
-ggplot(banksalary,aes(x=bsal))+
-  geom_histogram()
-
-ggplot(banksalary,aes(x=log(bsal)))+
-  geom_histogram()
-```
-    - The distribution of raw starting salary is positively skewed. We recommend logging the data in order to achieve normal distribution.
-    
     n. Regardless of your answer to the previous question, provide an interpretation for the coefficient for the male coefficient in a modified Model 3 after logging starting salary.
-```{r}
-model_bank4 <- lm(log(bsal) ~ senior + educ + exper + sex, data = banksalary)
-summary(model_bank4)
-
-check_model(model_bank4)
-```
-    - This model estimates that the starting salary of male are log(0.1295564) higher than female after accounting for seniority, experience and education.
-    
     o. Build your own final model for this study and justify the selection of your final model.  You might consider interactions with gender, since those terms could show that discrimination is stronger among certain workers.  Based on your final model, do you find evidence of gender discrimination at Harris Trust?  
-```{r}
-final_model1 <- lm(log(bsal) ~ senior + educ*sex + exper*sex, data = banksalary)
-summary(final_model1)
-
-final_model2 <- lm(log(bsal) ~ senior + educ + exper*sex, data = banksalary)
-summary(final_model2)
-
-final_model3 <- lm(log(bsal) ~ senior + educ*sex + exper, data = banksalary)
-summary(final_model3)
-
-final_model4 <- lm(log(bsal) ~ senior*sex + educ*sex + exper*sex, data = banksalary)
-summary(final_model4)
-
-compare_performance(final_model1,final_model2,final_model3,final_model4)
-anova(final_model1,final_model2)
-anova(final_model1,final_model3)
-anova(final_model1,final_model4)
-```
-    -According to AIC and BIC, final_model1 is the best model. Based on this model (final_model1), we don't find evidence of gender discrimination after accounting for seniority, interaction between experience and sex, as well as interaction between education and sex.
-    
 <br>
 
-1. **Sitting and MTL thickness.** @Siddarth2018 researched relations between time spent sitting (sedentary behavior) and the thickness of a participant's medial temporal lobe (MTL) in a 2018 paper entitled, "Sedentary behavior associated with reduced medial temporal lobe thickness in middle-aged and older adults".  MTL volume is negatively associated with Alzheimer's disease and memory impairment. Their data on 35 adults can be found in `sitting.csv`. Key variables include: <ul>
+2. **Sitting and MTL thickness.** @Siddarth2018 researched relations between time spent sitting (sedentary behavior) and the thickness of a participant's medial temporal lobe (MTL) in a 2018 paper entitled, "Sedentary behavior associated with reduced medial temporal lobe thickness in middle-aged and older adults".  MTL volume is negatively associated with Alzheimer's disease and memory impairment. Their data on 35 adults can be found in `sitting.csv`. Key variables include: <ul>
     - `MTL` = Medial temporal lobe thickness in mm 
     - `sitting` =  Reported hours/day spent sitting
     - `MET` =  Reported metabolic equivalent unit minutes per week
@@ -336,12 +212,39 @@ anova(final_model1,final_model4)
     - `education` = Years of education completed
     </ul>
     a. In their article's introduction, Siddarth et al. differentiate their analysis on sedentary behavior from an analysis on active behavior by citing evidence supporting the claim that, "one can be highly active yet still be sedentary for most of the day."  Fit your own linear model with `MET` and `sitting` as your explanatory and response variables, respectively. Using $R^2$, how much of the subject to subject variability in hours/day spent sitting can be explained by MET minutes per week? Does this support the claim that sedentary behaviors may be independent from physical activity?
+    - model1 <- lm(sitting ~ MET, data = sitting)
+    - summary (model1)
+    - With a non-significant R2 of 0.005345, MET minutes per week fails to explain the subject to subject variability in hours/day spent sitting. This shows that sedentary behaviors may be independent from physical activity.
+    
     b. In the paper's section, "Statistical analysis", the authors report that, "Due to the skewed distribution of physical activity levels, we used log-transformed values in all analyses using continuous physical activity measures."  Generate both a histogram of `MET` values and log--transformed `MET` values. Do you agree with the paper's decision to use a log-transformation here?
+    - hist(datSitting$MET)
+    - The histogram showed that the MET data data is indeed skewed.
+    - Log transformation: datSitting$logMET=log(datSitting$MET) %>% hist(datSitting$logMET)
+    - The new histogram showed a more normal distribution so yes we agree with the paper's decision to use a log-transformation here
+    
     c. Fit a preliminary model with `MTL` as the response and `sitting` as the sole explanatory variable.  Are LLSR conditions satisfied?
+    - model2 <- lm(MTL ~ sitting, data = datSitting) %>% check_model(model2)
+    - LINE check: so far none to our concern based on the check_model graphs.
+    
     d. Expand on your previous model by including a centered version of `age` as a covariate. Interpret all three coefficients in this model.
+    - Step 1: datSitting <- datSitting %>% mutate(centered_age = age - mean(age))
+    - Step 2: model3 <- lm(MTL ~ sitting+centered_age, data = datSitting)
+    - Step 3: summary(model3)
+    - Only reported hours/day spent sitting predicted Medial temporal lobe thickness significantly and not age. The model predicts 18.9% of the variance.
+    
     e. One model fit in @Siddarth2018 includes `sitting`, log--transformed `MET`, and `age` as explanatory variables. They report an estimate $\hat{\beta}_{1} = -0.02$ with confidence interval $(-0.04,-0.002)$ for the coefficient corresponding to `sitting`, and $\hat{\beta}_{2} = 0.007$ with confidence interval $(-0.07, 0.08)$ for the coefficient corresponding to `MET`. Verify these intervals and estimates on your own.
+    - Step 1: model4 <- lm(MTL ~ sitting+age+logMET, data = datSitting)
+    - Step 2: summary(model4)
+    - Step 3: confint(model4)
+    
     f. Based on your confidence intervals from the previous part, do you support the paper's claim that, "it is possible that sedentary behavior is a more significant predictor of brain structure, specifically MTL thickness [than physical activity]"? Why or why not?
-    g. A *New York Times* article was published discussing @Siddarth2018 with the title "Standing Up at Your Desk Could Make You Smarter" [@Friedman2018]. Do you agree with this headline choice? Why or why not?  
+    - Yes, because sitting predicts MLT significantly but not the other predictors like MET.
+    
+    g. A *New York Times* article was published discussing @Siddarth2018 with the title "Standing Up at Your Desk Could Make You Smarter" [@Friedman2018]. Do you agree with this headline choice? Why or why not? 
+    - No, because the result only showed that sitting longer is associated with reduced medial temporal lobe thickness, but it does not imply anything about standing activities. 
+
+```{r test-main2, child = 'sitting.Rmd'}
+```
 <br>
 
 1. **Housing prices and log transformations.** The dataset `kingCountyHouses.csv` contains data on over 20,000 houses sold in King County,

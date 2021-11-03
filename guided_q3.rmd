@@ -1,0 +1,142 @@
+---
+title: "q3"
+author: "ML"
+date: "11/2/2021"
+output: html_document
+---
+
+# Housing prices and log transformations
+
+```{r libraries, message=FALSE}
+
+library(tidyverse)
+library(broom)
+library(patchwork)
+library(performance)
+
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+```
+
+
+## Dataset
+
+```{r df, message=FALSE}
+
+housing <- read_csv("data/kingCountyHouses.csv")
+head(housing, 10)
+```
+
+## GLM: A linear model to predict a house’s selling price
+
+```{r explorePlot}
+
+df1 <- housing %>% 
+  select("price", "sqft") 
+summary(df1)
+
+## EDA graph
+
+price_hist <- ggplot(data = housing, aes(x = price)) + 
+  geom_histogram(binwidth = 200000L, fill = "white",
+                 color = "black") + 
+  xlab("Selling price of the house") + 
+  ylab("Frequency") + 
+  labs(title="(a)")
+
+sqft_hist <- ggplot(data = housing, aes(x = sqft)) + 
+  geom_histogram(binwidth = 500, fill = "white",
+                 color = "black") + 
+  xlab("Interior square footage") + 
+  ylab("Frequency") + 
+  labs(title="(b)")
+
+price_hist|sqft_hist
+
+plot(housing$price, housing$sqft)
+
+```
+Note: The selling price and square footage are both positively-skewed. 
+
+## Model 1: Simple linear regression model
+
+```{r m1}
+
+## Price as the function of sqft
+
+m1 <- lm(price ~ sqft, data = housing)
+tidy(summary(m1))
+
+check_model(m1)
+
+```
+
+There are violation in the assumptions. 
+1. I: There is no independence in the price. Houses with larger square feet are always sold at a higher price. 
+2. N: Data is not normal. It is positively-skewed. 
+3. E: Price are not distributed at each level of house square feet. 
+
+
+The slope coefficient \beta_{1} is 280.624. The price increases by 280.624 dollars for each square feet increase. 
+
+
+## Model 2: Log transformation of Price
+
+```{r m2}
+
+housing <- housing %>% 
+  mutate(logprice = log(price))
+
+m2 <- lm(logprice ~ sqft, data = housing)
+tidy(summary(m2))
+
+check_model(m2)
+plot(housing$sqft, housing$logprice)
+
+compare_performance(m1, m2)
+
+```
+
+The price increases by 3.987e-04 with each 1 square feet increase. 
+
+## Model 3: Log transformation of sqft
+
+```{r m3}
+
+housing <- housing %>% 
+  mutate(logsqft = log(sqft))
+
+m3 <- lm(price ~ logsqft, data = housing)
+tidy(summary(m3))
+check_model(m3)
+
+plot(housing$logsqft, housing$price)
+
+```
+
+
+
+## Model 4: Log transformation of both variables
+
+```{r m4}
+
+m4 <- lm(logprice ~ logsqft, data = housing)
+tidy(summary(m4))
+check_model(m1)
+
+plot(housing$logsqft, housing$logprice)
+
+compare_performance(m1, m2, m3, m4, rank = TRUE)
+
+```
+
+# Summary
+
+```{r finalnote}
+
+tab_model(m1, m2)
+
+tab_model(m3, m4)
+```
+

@@ -371,7 +371,10 @@ Washington [@harlfoxem]. The dataset includes the following variables:
     l. In Model 4, what is the effect on `price` corresponding to a 1\% increase in `sqft`?
     m. Are LLSR assumptions satisfied in Model 4? Why or why not?
     n. Find another explanatory variable which can be added to Model 4 to create a model with a higher adjusted $R^2$ value. Interpret the coefficient of this added variable.
-    
+
+```{r test-main, child = 'guided_q3.Rmd'}
+```
+   
 ### Open-Ended Exercises
 1. **The Bechdel Test.** In April, 2014, website FiveThirtyEight published the article, "The Dollar-And-Cents Case Against Hollywood’s Exclusion of Women" [@Hickey2014]. There, they analyze returns on investment for 1,615 films released between 1990 and 2013 based on the Bechdel test. The test, developed by cartoonist Alison Bechdel, measures gender bias in films by checking if a film meets three criteria:
     - there are at least two named women in the picture
